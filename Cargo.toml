@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name    = "robo_remote"
+name = "robo_remote"
 version = "0.1.0"
 
 [[bin]]
@@ -39,7 +39,7 @@ critical-section = "1.2.0"
 embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480"] }
 embassy-time = { version = "0.4.0", features = ["generic-queue-8"] }
 esp-hal-embassy = { version = "0.7.0", features = ["esp32c6"] }
-esp-wifi = { version = "0.13.0", features = [
+esp-wifi = { version = "0.13.0",  features = [
   "ble",
   "builtin-scheduler",
   "coex",
@@ -47,11 +47,19 @@ esp-wifi = { version = "0.13.0", features = [
   "esp32c6",
   "log",
   "wifi",
-] }
+  "esp-now",
+]}
 heapless = { version = "0.8.0", default-features = false }
 static_cell = { version = "2.1.0", features = ["nightly"] }
-esp-backtrace = {version = "0.15.1", features = ["colors","esp32c6","println"]}
-esp-println = {version = "0.13.1", default-features = true,features = ["defmt-espflash","log"]}
+esp-backtrace = { version = "0.15.1", features = [
+  "colors",
+  "esp32c6",
+  "println",
+] }
+esp-println = { version = "0.13.1", default-features = true, features = [
+  "defmt-espflash",
+  "log",
+] }
 log = "0.4.26"
 panic-halt = "1.0.0"
 cfg-if = "1.0.0"
@@ -61,17 +69,23 @@ edge-nal-embassy = "0.5.0"
 edge-dhcp = "0.5.0"
 
 
+# It is necessary to build with optimization level 2 or 3 since
+# otherwise, it might not even be able to connect or advertise.
+[profile.dev.package.esp-wifi]
+opt-level = 3
+
 
 [profile.dev]
 # Rust debug is too slow.
 # For debug builds always builds with some optimization
 opt-level = "s"
 
+
 [profile.release]
-codegen-units    = 1     # LLVM can perform better optimizations using a single thread
-debug            = 2
+codegen-units = 1        # LLVM can perform better optimizations using a single thread
+debug = 2
 debug-assertions = false
-incremental      = false
-lto              = 'fat'
-opt-level        = 's'
-overflow-checks  = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false

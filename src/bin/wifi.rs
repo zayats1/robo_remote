@@ -16,13 +16,7 @@ use core::{net::Ipv4Addr, str::FromStr};
 
 use embassy_executor::Spawner;
 use embassy_net::{
-    tcp::TcpSocket,
-    IpListenEndpoint,
-    Ipv4Cidr,
-    Runner,
-    Stack,
-    StackResources,
-    StaticConfigV4,
+    tcp::TcpSocket, IpListenEndpoint, Ipv4Cidr, Runner, Stack, StackResources, StaticConfigV4,
 };
 use embassy_time::{Duration, Timer};
 use esp_alloc as _;
@@ -32,18 +26,12 @@ use esp_println::{print, println};
 use esp_wifi::{
     init,
     wifi::{
-        AccessPointConfiguration,
-        Configuration,
-        WifiController,
-        WifiDevice,
-        WifiEvent,
-        WifiState,
+        AccessPointConfiguration, Configuration, WifiController, WifiDevice, WifiEvent, WifiState,
     },
     EspWifiController,
 };
 
 use panic_halt as _;
-
 
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
 macro_rules! mk_static {
@@ -55,11 +43,12 @@ macro_rules! mk_static {
     }};
 }
 
-const GW_IP_ADDR_ENV: Option<&'static str> = Some("192.168.0.7");
+const GW_IP_ADDR_ENV: Option<&'static str> = Some("192.168.2.1");
 
 #[esp_hal_embassy::main]
 async fn main(spawner: Spawner) -> ! {
     esp_println::logger::init_logger_from_env();
+
     let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
     let peripherals = esp_hal::init(config);
 
@@ -77,16 +66,9 @@ async fn main(spawner: Spawner) -> ! {
 
     let device = interfaces.sta;
 
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "esp32")] {
-            let timg1 = TimerGroup::new(peripherals.TIMG1);
-            esp_hal_embassy::init(timg1.timer0);
-        } else {
-            use esp_hal::timer::systimer::SystemTimer;
-            let systimer = SystemTimer::new(peripherals.SYSTIMER);
-            esp_hal_embassy::init(systimer.alarm0);
-        }
-    }
+    use esp_hal::timer::systimer::SystemTimer;
+    let systimer = SystemTimer::new(peripherals.SYSTIMER);
+    esp_hal_embassy::init(systimer.alarm0);
 
     let gw_ip_addr_str = GW_IP_ADDR_ENV.unwrap_or("192.168.2.1");
     let gw_ip_addr = Ipv4Addr::from_str(gw_ip_addr_str).expect("failed to parse gateway ip");
@@ -107,25 +89,24 @@ async fn main(spawner: Spawner) -> ! {
         seed,
     );
 
-  
-
     let mut rx_buffer = [0; 1536];
     let mut tx_buffer = [0; 1536];
 
-    spawner.spawn(connection(controller)).ok();
-    spawner.spawn(net_task(runner)).ok();
-    spawner.spawn(run_dhcp(stack, gw_ip_addr_str)).ok();
-    loop {
-        if stack.is_link_up() {
-            break;
-        }
-        Timer::after(Duration::from_millis(500)).await;
-    }
+    // loop {
+    //     if stack.is_link_up() {
+    //         break;
+    //     }
+    //     Timer::after(Duration::from_millis(500)).await;
+    // }
     println!(
         "Connect to the AP `esp-wifi` and point your browser to http://{gw_ip_addr_str}:8080/"
     );
+    spawner.spawn(net_task(runner)).ok();
 
-   
+    spawner.spawn(run_dhcp(stack, gw_ip_addr_str)).ok();
+    spawner.spawn(connection(controller)).ok();
+
+    Timer::after(Duration::from_millis(500)).await;
     println!("DHCP is enabled so there's no need to configure a static IP, just in case:");
     while !stack.is_config_up() {
         Timer::after(Duration::from_millis(100)).await
@@ -204,6 +185,7 @@ async fn main(spawner: Spawner) -> ! {
         socket.close();
         Timer::after(Duration::from_millis(1000)).await;
 
+        
         socket.abort();
     }
 }
