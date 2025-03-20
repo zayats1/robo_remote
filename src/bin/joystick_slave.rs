@@ -13,7 +13,7 @@ use core::{fmt::Write, str};
 
 use embassy_executor::Spawner;
 use embassy_futures::select::{select, Either};
-use embassy_time::{Duration, Ticker};
+use embassy_time::{Duration, Ticker, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::{
@@ -75,12 +75,12 @@ async fn main(_spawner: Spawner) -> ! {
         }
     }
 
-    let mut ticker = Ticker::every(Duration::from_millis(500)); // todo: make faster
-    let mut data: String<64> = String::new();
+
+
     loop {
-        let res = select(ticker.next(), async {
+       
             let r = esp_now.receive_async().await;
-            println!("Received {:?}", str::from_utf8(r.data()));
+            println!("Received {:?}", str::from_utf8(r.data()).unwrap_or("Data is not received properly"));
             if r.info.dst_address == BROADCAST_ADDRESS {
                 if !esp_now.peer_exists(&r.info.src_address) {
                     esp_now
@@ -92,21 +92,8 @@ async fn main(_spawner: Spawner) -> ! {
                         })
                         .unwrap();
                 }
-                let status = esp_now.send_async(&r.info.src_address, b"Hello Peer").await;
-                println!("Send hello to peer status: {:?}", status);
             }
-        })
-        .await;
-
-        match res {
-            Either::First(_) => {
-                println!("Send");
-                data.clear();
-                writeln!(&mut data,"X:{};\nY:{};\n",44,45).unwrap(); // todo
-                let status = esp_now.send_async(&BROADCAST_ADDRESS, data.as_bytes()).await;
-                println!("Send broadcast status: {:?}", status)
-            }
-            Either::Second(_) => (),
-        }
+        Timer::after_millis(2).await;
+      
     }
 }

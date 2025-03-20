@@ -10,15 +10,12 @@
 
 use core::{fmt::Write, str};
 
-
 use embassy_executor::Spawner;
 use embassy_futures::select::{select, Either};
-use embassy_time::{Duration, Ticker};
+use embassy_time::{Duration, Ticker, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
-use esp_hal::{
-    clock::CpuClock, rng::Rng, timer::timg::TimerGroup
-};
+use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
 use esp_println::println;
 use esp_wifi::{
     esp_now::{PeerInfo, BROADCAST_ADDRESS},
@@ -26,7 +23,6 @@ use esp_wifi::{
 };
 use heapless::String;
 use panic_halt as _;
-
 
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
 macro_rules! mk_static {
@@ -37,7 +33,6 @@ macro_rules! mk_static {
         x
     }};
 }
-
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -78,35 +73,13 @@ async fn main(_spawner: Spawner) -> ! {
     let mut ticker = Ticker::every(Duration::from_millis(500)); // todo: make faster
     let mut data: String<64> = String::new();
     loop {
-        let res = select(ticker.next(), async {
-            let r = esp_now.receive_async().await;
-            println!("Received {:?}", str::from_utf8(r.data()));
-            if r.info.dst_address == BROADCAST_ADDRESS {
-                if !esp_now.peer_exists(&r.info.src_address) {
-                    esp_now
-                        .add_peer(PeerInfo {
-                            peer_address: r.info.src_address,
-                            lmk: None,
-                            channel: None,
-                            encrypt: false,
-                        })
-                        .unwrap();
-                }
-                let status = esp_now.send_async(&r.info.src_address, b"Hello Peer").await;
-                println!("Send hello to peer status: {:?}", status);
-            }
-        })
-        .await;
+        data.clear();
+        writeln!(&mut data, "X:{};\nY:{};\n", 44, 45).unwrap(); // todo
+        let status = esp_now
+            .send_async(&BROADCAST_ADDRESS, data.as_bytes())
+            .await;
+        println!("Send broadcast status: {:?}", status);
 
-        match res {
-            Either::First(_) => {
-                println!("Send");
-                data.clear();
-                writeln!(&mut data,"X:{};\nY:{};\n",44,45).unwrap(); // todo
-                let status = esp_now.send_async(&BROADCAST_ADDRESS, data.as_bytes()).await;
-                println!("Send broadcast status: {:?}", status)
-            }
-            Either::Second(_) => (),
-        }
+        ticker.next().await;
     }
 }
