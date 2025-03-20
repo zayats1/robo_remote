@@ -15,7 +15,9 @@ use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Ticker, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
-use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
+use esp_hal::{
+    analog::adc::{Adc, AdcConfig, Attenuation}, clock::CpuClock, peripheral::Peripheral, rng::Rng, timer::timg::TimerGroup
+};
 use esp_println::println;
 use esp_wifi::{
     esp_now::{PeerInfo, BROADCAST_ADDRESS},
@@ -72,9 +74,30 @@ async fn main(_spawner: Spawner) -> ! {
 
     let mut ticker = Ticker::every(Duration::from_millis(500)); // todo: make faster
     let mut data: String<64> = String::new();
+
+    let analog_pin = peripherals.GPIO1;
+    let mut adc1_config = AdcConfig::new();
+
+    let mut pin = adc1_config.enable_pin(analog_pin, Attenuation::_0dB);
+    let mut adc1 =
+        Adc::new(unsafe { peripherals.ADC1.clone_unchecked() }, adc1_config).into_async();
+
+    let analog_pin2 = peripherals.GPIO2;
+    let mut adc12_config = AdcConfig::new();
+    let mut pin2 = adc12_config.enable_pin(analog_pin2, Attenuation::_0dB);
+    let mut adc12 = Adc::new(peripherals.ADC1, adc12_config).into_async();
+
     loop {
+        let x = adc1.read_oneshot(&mut pin).await.saturating_sub(2034);
+
+        println!("X value: {}", x);
+        let y = adc12.read_oneshot(&mut pin2).await.saturating_sub(2034);
+
+        println!("Y value: {}", y);
+
+        Timer::after(Duration::from_millis(500)).await;
         data.clear();
-        writeln!(&mut data, "X:{};\nY:{};\n", 44, 45).unwrap(); // todo
+        writeln!(&mut data, "X:{};\nY:{};\n", x, y).unwrap(); // todo
         let status = esp_now
             .send_async(&BROADCAST_ADDRESS, data.as_bytes())
             .await;
