@@ -6,9 +6,8 @@ use embassy_time::{Duration, Timer};
 use esp_hal::analog::adc::{Adc, AdcConfig, Attenuation};
 use esp_hal::clock::CpuClock;
 use esp_hal::peripheral::Peripheral;
-use esp_hal::peripherals::ADC1;
 use esp_hal::timer::systimer::SystemTimer;
-// use esp_hal::timer::timg::TimerGroup;
+
 use esp_println::println;
 use panic_halt as _;
 

@@ -8,25 +8,19 @@
 #![no_std]
 #![no_main]
 
-use core::{fmt::Write, str};
-
+use core::str;
 
 use embassy_executor::Spawner;
-use embassy_futures::select::{select, Either};
-use embassy_time::{Duration, Ticker, Timer};
+use embassy_time::Timer;
 use esp_alloc as _;
 use esp_backtrace as _;
-use esp_hal::{
-    clock::CpuClock, rng::Rng, timer::timg::TimerGroup
-};
+use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
 use esp_println::println;
 use esp_wifi::{
     esp_now::{PeerInfo, BROADCAST_ADDRESS},
     init, EspWifiController,
 };
-use heapless::String;
 use panic_halt as _;
-
 
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
 macro_rules! mk_static {
@@ -37,7 +31,6 @@ macro_rules! mk_static {
         x
     }};
 }
-
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -64,36 +57,28 @@ async fn main(_spawner: Spawner) -> ! {
     let mut esp_now = esp_wifi::esp_now::EspNow::new(&esp_wifi_ctrl, wifi).unwrap();
     println!("esp-now version {}", esp_now.version().unwrap());
 
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "esp32")] {
-            let timg1 = TimerGroup::new(peripherals.TIMG1);
-            esp_hal_embassy::init(timg1.timer0);
-        } else {
-            use esp_hal::timer::systimer::SystemTimer;
-            let systimer = SystemTimer::new(peripherals.SYSTIMER);
-            esp_hal_embassy::init(systimer.alarm0);
-        }
-    }
-
-
+    use esp_hal::timer::systimer::SystemTimer;
+    let systimer = SystemTimer::new(peripherals.SYSTIMER);
+    esp_hal_embassy::init(systimer.alarm0);
 
     loop {
-       
-            let r = esp_now.receive_async().await;
-            println!("Received {:?}", str::from_utf8(r.data()).unwrap_or("Data is not received properly"));
-            if r.info.dst_address == BROADCAST_ADDRESS {
-                if !esp_now.peer_exists(&r.info.src_address) {
-                    esp_now
-                        .add_peer(PeerInfo {
-                            peer_address: r.info.src_address,
-                            lmk: None,
-                            channel: None,
-                            encrypt: false,
-                        })
-                        .unwrap();
-                }
+        let r = esp_now.receive_async().await;
+        println!(
+            "Received {:?}",
+            str::from_utf8(r.data()).unwrap_or("Data is not received properly")
+        );
+        if r.info.dst_address == BROADCAST_ADDRESS {
+            if !esp_now.peer_exists(&r.info.src_address) {
+                esp_now
+                    .add_peer(PeerInfo {
+                        peer_address: r.info.src_address,
+                        lmk: None,
+                        channel: None,
+                        encrypt: false,
+                    })
+                    .unwrap();
             }
+        }
         Timer::after_millis(2).await;
-      
     }
 }

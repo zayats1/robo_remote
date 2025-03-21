@@ -8,21 +8,21 @@
 #![no_std]
 #![no_main]
 
-use core::{fmt::Write, str};
+use core::fmt::Write;
 
 use embassy_executor::Spawner;
-use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Ticker, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::{
-    analog::adc::{Adc, AdcConfig, Attenuation}, clock::CpuClock, peripheral::Peripheral, rng::Rng, timer::timg::TimerGroup
+    analog::adc::{Adc, AdcConfig, Attenuation},
+    clock::CpuClock,
+    peripheral::Peripheral,
+    rng::Rng,
+    timer::timg::TimerGroup,
 };
 use esp_println::println;
-use esp_wifi::{
-    esp_now::{PeerInfo, BROADCAST_ADDRESS},
-    init, EspWifiController,
-};
+use esp_wifi::{esp_now::BROADCAST_ADDRESS, init, EspWifiController};
 use heapless::String;
 use panic_halt as _;
 
@@ -61,16 +61,9 @@ async fn main(_spawner: Spawner) -> ! {
     let mut esp_now = esp_wifi::esp_now::EspNow::new(&esp_wifi_ctrl, wifi).unwrap();
     println!("esp-now version {}", esp_now.version().unwrap());
 
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "esp32")] {
-            let timg1 = TimerGroup::new(peripherals.TIMG1);
-            esp_hal_embassy::init(timg1.timer0);
-        } else {
-            use esp_hal::timer::systimer::SystemTimer;
-            let systimer = SystemTimer::new(peripherals.SYSTIMER);
-            esp_hal_embassy::init(systimer.alarm0);
-        }
-    }
+    use esp_hal::timer::systimer::SystemTimer;
+    let systimer = SystemTimer::new(peripherals.SYSTIMER);
+    esp_hal_embassy::init(systimer.alarm0);
 
     let mut ticker = Ticker::every(Duration::from_millis(500)); // todo: make faster
     let mut data: String<64> = String::new();
@@ -97,7 +90,7 @@ async fn main(_spawner: Spawner) -> ! {
 
         Timer::after(Duration::from_millis(500)).await;
         data.clear();
-        writeln!(&mut data, "X:{};\nY:{};\n", x, y).unwrap(); // todo
+        writeln!(&mut data, "X:{};Y:{};", x, y).unwrap(); // todo
         let status = esp_now
             .send_async(&BROADCAST_ADDRESS, data.as_bytes())
             .await;

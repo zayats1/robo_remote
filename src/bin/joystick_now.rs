@@ -10,15 +10,12 @@
 
 use core::{fmt::Write, str};
 
-
 use embassy_executor::Spawner;
 use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Ticker};
 use esp_alloc as _;
 use esp_backtrace as _;
-use esp_hal::{
-    clock::CpuClock, rng::Rng, timer::timg::TimerGroup
-};
+use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
 use esp_println::println;
 use esp_wifi::{
     esp_now::{PeerInfo, BROADCAST_ADDRESS},
@@ -26,7 +23,6 @@ use esp_wifi::{
 };
 use heapless::String;
 use panic_halt as _;
-
 
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
 macro_rules! mk_static {
@@ -37,7 +33,6 @@ macro_rules! mk_static {
         x
     }};
 }
-
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -64,16 +59,9 @@ async fn main(_spawner: Spawner) -> ! {
     let mut esp_now = esp_wifi::esp_now::EspNow::new(&esp_wifi_ctrl, wifi).unwrap();
     println!("esp-now version {}", esp_now.version().unwrap());
 
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "esp32")] {
-            let timg1 = TimerGroup::new(peripherals.TIMG1);
-            esp_hal_embassy::init(timg1.timer0);
-        } else {
-            use esp_hal::timer::systimer::SystemTimer;
-            let systimer = SystemTimer::new(peripherals.SYSTIMER);
-            esp_hal_embassy::init(systimer.alarm0);
-        }
-    }
+    use esp_hal::timer::systimer::SystemTimer;
+    let systimer = SystemTimer::new(peripherals.SYSTIMER);
+    esp_hal_embassy::init(systimer.alarm0);
 
     let mut ticker = Ticker::every(Duration::from_millis(500)); // todo: make faster
     let mut data: String<64> = String::new();
@@ -102,8 +90,10 @@ async fn main(_spawner: Spawner) -> ! {
             Either::First(_) => {
                 println!("Send");
                 data.clear();
-                writeln!(&mut data,"X:{};\nY:{};\n",44,45).unwrap(); // todo
-                let status = esp_now.send_async(&BROADCAST_ADDRESS, data.as_bytes()).await;
+                writeln!(&mut data, "X:{};\nY:{};\n", 44, 45).unwrap(); // todo
+                let status = esp_now
+                    .send_async(&BROADCAST_ADDRESS, data.as_bytes())
+                    .await;
                 println!("Send broadcast status: {:?}", status)
             }
             Either::Second(_) => (),
