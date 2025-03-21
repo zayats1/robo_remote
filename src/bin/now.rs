@@ -24,7 +24,7 @@ use esp_wifi::{
     esp_now::{PeerInfo, BROADCAST_ADDRESS},
     init,
 };
-use panic_halt as _;
+use robo_remote as _;
 #[main]
 fn main() -> ! {
     esp_println::logger::init_logger_from_env();

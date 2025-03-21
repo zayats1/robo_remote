@@ -9,7 +9,7 @@ use esp_hal::peripheral::Peripheral;
 use esp_hal::timer::systimer::SystemTimer;
 
 use esp_println::println;
-use panic_halt as _;
+use robo_remote as _;
 
 extern crate alloc;
 

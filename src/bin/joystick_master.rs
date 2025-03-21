@@ -24,8 +24,7 @@ use esp_hal::{
 use esp_println::println;
 use esp_wifi::{esp_now::BROADCAST_ADDRESS, init, EspWifiController};
 use heapless::String;
-use panic_halt as _;
-
+use robo_remote as _;
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
 macro_rules! mk_static {
     ($t:ty,$val:expr) => {{
