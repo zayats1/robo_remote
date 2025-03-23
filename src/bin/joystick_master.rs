@@ -8,7 +8,7 @@
 #![no_std]
 #![no_main]
 
-use core::fmt::Write;
+use core::{cell::RefCell, fmt::Write};
 
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Ticker, Timer};
@@ -17,7 +17,6 @@ use esp_backtrace as _;
 use esp_hal::{
     analog::adc::{Adc, AdcConfig, Attenuation},
     clock::CpuClock,
-    peripheral::Peripheral,
     rng::Rng,
     timer::timg::TimerGroup,
 };
@@ -34,6 +33,9 @@ macro_rules! mk_static {
         x
     }};
 }
+
+
+const ADC_SHIFT:u16 = 2048;
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -70,24 +72,25 @@ async fn main(_spawner: Spawner) -> ! {
     let analog_pin = peripherals.GPIO1;
     let mut adc1_config = AdcConfig::new();
 
-    let mut pin = adc1_config.enable_pin(analog_pin, Attenuation::_0dB);
+    let mut pin = adc1_config.enable_pin(analog_pin, Attenuation::_11dB);
+
+    let adc = RefCell::new(peripherals.ADC1);
     let mut adc1 =
-        Adc::new(unsafe { peripherals.ADC1.clone_unchecked() }, adc1_config).into_async();
+        Adc::new(adc.borrow_mut(), adc1_config).into_async();
 
     let analog_pin2 = peripherals.GPIO2;
     let mut adc12_config = AdcConfig::new();
-    let mut pin2 = adc12_config.enable_pin(analog_pin2, Attenuation::_0dB);
-    let mut adc12 = Adc::new(peripherals.ADC1, adc12_config).into_async();
+    let mut pin2 = adc12_config.enable_pin(analog_pin2, Attenuation::_11dB);
+    let mut adc12 = Adc::new(adc.borrow_mut(), adc12_config).into_async();
 
     loop {
-        let x = adc1.read_oneshot(&mut pin).await.saturating_sub(2034);
-
+        let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
         println!("X value: {}", x);
-        let y = adc12.read_oneshot(&mut pin2).await.saturating_sub(2034);
 
+        let y = adc12.read_oneshot(&mut pin2).await.saturating_sub(ADC_SHIFT);
         println!("Y value: {}", y);
+        Timer::after(Duration::from_millis(250)).await;
 
-        Timer::after(Duration::from_millis(500)).await;
         data.clear();
         writeln!(&mut data, "X:{};Y:{};", x, y).unwrap(); // todo
         let status = esp_now
