@@ -34,8 +34,7 @@ macro_rules! mk_static {
     }};
 }
 
-
-const ADC_SHIFT:u16 = 2048;
+const ADC_SHIFT: u16 = 2048;
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -75,8 +74,7 @@ async fn main(_spawner: Spawner) -> ! {
     let mut pin = adc1_config.enable_pin(analog_pin, Attenuation::_11dB);
 
     let adc = RefCell::new(peripherals.ADC1);
-    let mut adc1 =
-        Adc::new(adc.borrow_mut(), adc1_config).into_async();
+    let mut adc1 = Adc::new(adc.borrow_mut(), adc1_config).into_async();
 
     let analog_pin2 = peripherals.GPIO2;
     let mut adc12_config = AdcConfig::new();
@@ -87,7 +85,10 @@ async fn main(_spawner: Spawner) -> ! {
         let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
         println!("X value: {}", x);
 
-        let y = adc12.read_oneshot(&mut pin2).await.saturating_sub(ADC_SHIFT);
+        let y = adc12
+            .read_oneshot(&mut pin2)
+            .await
+            .saturating_sub(ADC_SHIFT);
         println!("Y value: {}", y);
         Timer::after(Duration::from_millis(250)).await;
 
