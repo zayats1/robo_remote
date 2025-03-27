@@ -22,6 +22,10 @@ use esp_wifi::{
 };
 use robo_remote as _;
 
+
+const THE_ADDRESS: [u8;6] = [0x54u8,0x32,0x04,0x32,0xf2,0xb8];
+
+
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
 macro_rules! mk_static {
     ($t:ty,$val:expr) => {{
@@ -67,7 +71,7 @@ async fn main(_spawner: Spawner) -> ! {
             "Received {:?}",
             str::from_utf8(r.data()).unwrap_or("Data is not received properly")
         );
-        if r.info.dst_address == BROADCAST_ADDRESS {
+        if r.info.dst_address == THE_ADDRESS {
             if !esp_now.peer_exists(&r.info.src_address) {
                 esp_now
                     .add_peer(PeerInfo {

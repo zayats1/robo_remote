@@ -21,7 +21,7 @@ use esp_hal::{
     timer::timg::TimerGroup,
 };
 use esp_println::println;
-use esp_wifi::{esp_now::BROADCAST_ADDRESS, init, EspWifiController};
+use esp_wifi::{esp_now::{PeerInfo, BROADCAST_ADDRESS}, init, EspWifiController};
 use heapless::String;
 use robo_remote as _;
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
@@ -35,6 +35,8 @@ macro_rules! mk_static {
 }
 
 const ADC_SHIFT: u16 = 2048;
+
+const PEER_ADDRESS: [u8;6] = [0x54,0x32,0x04,0x32,0xf2,0xb8];
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -85,6 +87,17 @@ async fn main(_spawner: Spawner) -> ! {
         let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
         println!("X value: {}", x);
 
+
+        if !esp_now.peer_exists(&PEER_ADDRESS) {
+            esp_now
+                .add_peer(PeerInfo {
+                    peer_address: PEER_ADDRESS,
+                    lmk: None,
+                    channel: None,
+                    encrypt: false,
+                })
+                .unwrap();
+        }
         let y = adc12
             .read_oneshot(&mut pin2)
             .await
@@ -95,7 +108,7 @@ async fn main(_spawner: Spawner) -> ! {
         data.clear();
         writeln!(&mut data, "X:{};Y:{};", x, y).unwrap(); // todo
         let status = esp_now
-            .send_async(&BROADCAST_ADDRESS, data.as_bytes())
+            .send_async(&PEER_ADDRESS, data.as_bytes())
             .await;
         println!("Send broadcast status: {:?}", status);
 
