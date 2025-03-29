@@ -17,24 +17,13 @@ use esp_backtrace as _;
 use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
 use esp_println::println;
 use esp_wifi::{
-    esp_now::{PeerInfo, BROADCAST_ADDRESS},
+    esp_now::PeerInfo,
     init, EspWifiController,
 };
-use robo_remote as _;
+use robo_remote::{self as _, mk_static};
 
 
 const THE_ADDRESS: [u8;6] = [0x54u8,0x32,0x04,0x32,0xf2,0xb8];
-
-
-// When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
-macro_rules! mk_static {
-    ($t:ty,$val:expr) => {{
-        static STATIC_CELL: static_cell::StaticCell<$t> = static_cell::StaticCell::new();
-        #[deny(unused_attributes)]
-        let x = STATIC_CELL.uninit().write(($val));
-        x
-    }};
-}
 
 // TODO: master address
 #[esp_hal_embassy::main]

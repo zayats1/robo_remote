@@ -21,22 +21,13 @@ use esp_hal::{
     timer::timg::TimerGroup,
 };
 use esp_println::println;
-use esp_wifi::{esp_now::{PeerInfo, BROADCAST_ADDRESS}, init, EspWifiController};
+use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
 use heapless::String;
-use robo_remote as _;
-// When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
-macro_rules! mk_static {
-    ($t:ty,$val:expr) => {{
-        static STATIC_CELL: static_cell::StaticCell<$t> = static_cell::StaticCell::new();
-        #[deny(unused_attributes)]
-        let x = STATIC_CELL.uninit().write(($val));
-        x
-    }};
-}
+use robo_remote::{self as _, mk_static};
 
 const ADC_SHIFT: u16 = 2048;
 
-const PEER_ADDRESS: [u8;6] = [0x54,0x32,0x04,0x32,0xf2,0xb8];
+const PEER_ADDRESS: [u8; 6] = [0x54, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -81,12 +72,11 @@ async fn main(_spawner: Spawner) -> ! {
     let analog_pin2 = peripherals.GPIO2;
     let mut adc12_config = AdcConfig::new();
     let mut pin2 = adc12_config.enable_pin(analog_pin2, Attenuation::_11dB);
-    let mut adc12 = Adc::new(adc.borrow_mut(), adc12_config).into_async();
+    let mut adc12 = Adc::new(adc.borrow_mut(), adc12_config);
 
     loop {
         let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
         println!("X value: {}", x);
-
 
         if !esp_now.peer_exists(&PEER_ADDRESS) {
             esp_now
@@ -98,18 +88,17 @@ async fn main(_spawner: Spawner) -> ! {
                 })
                 .unwrap();
         }
+
         let y = adc12
             .read_oneshot(&mut pin2)
-            .await
+            .unwrap_or_default()
             .saturating_sub(ADC_SHIFT);
         println!("Y value: {}", y);
         Timer::after(Duration::from_millis(250)).await;
 
         data.clear();
         writeln!(&mut data, "X:{};Y:{};", x, y).unwrap(); // todo
-        let status = esp_now
-            .send_async(&PEER_ADDRESS, data.as_bytes())
-            .await;
+        let status = esp_now.send_async(&PEER_ADDRESS, data.as_bytes()).await;
         println!("Send broadcast status: {:?}", status);
 
         ticker.next().await;

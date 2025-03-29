@@ -12,7 +12,7 @@ use esp_println::println;
 use robo_remote as _;
 
 extern crate alloc;
-
+const ADC_SHIFT: u16 = 2048;
 #[esp_hal_embassy::main]
 async fn main(_spawner: Spawner) {
     // generator version: 0.3.1
@@ -39,10 +39,10 @@ async fn main(_spawner: Spawner) {
     loop {
         let pin_value = adc1.read_oneshot(&mut pin).await;
 
-        println!("X value: {}", pin_value.saturating_sub(2034));
+        println!("X value: {}", pin_value.saturating_sub(ADC_SHIFT));
         let pin2_value = adc12.read_oneshot(&mut pin2).await;
 
-        println!("Y value: {}", pin2_value.saturating_sub(2034));
+        println!("Y value: {}", pin2_value.saturating_sub(ADC_SHIFT));
 
         Timer::after(Duration::from_millis(500)).await;
     }
