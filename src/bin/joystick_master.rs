@@ -25,7 +25,7 @@ use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
 use heapless::String;
 use robo_remote::{self as _, mk_static};
 
-const ADC_SHIFT: u16 = 2048;
+const ADC_SHIFT: u16 = 2144; // to obtain zero at the minimum of a joystick range
 
 const PEER_ADDRESS: [u8; 6] = [0x54, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 
