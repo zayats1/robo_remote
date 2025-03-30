@@ -17,7 +17,7 @@ use esp_backtrace as _;
 use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
 use esp_println::println;
 use esp_wifi::{
-    esp_now::PeerInfo,
+    esp_now::{EspNowWifiInterface, PeerInfo},
     init, EspWifiController,
 };
 use robo_remote::{self as _, mk_static};
@@ -47,7 +47,12 @@ async fn main(_spawner: Spawner) -> ! {
     );
 
     let wifi = peripherals.WIFI;
-    let mut esp_now = esp_wifi::esp_now::EspNow::new(&esp_wifi_ctrl, wifi).unwrap();
+    let (mut controller, interfaces) = esp_wifi::wifi::new(&esp_wifi_ctrl, wifi).unwrap();
+    controller.set_mode(esp_wifi::wifi::WifiMode::ApSta).unwrap();
+    controller.start().unwrap();
+
+    let mut esp_now = interfaces.esp_now;
+ 
     println!("esp-now version {}", esp_now.version().unwrap());
 
     use esp_hal::timer::systimer::SystemTimer;
@@ -63,12 +68,8 @@ async fn main(_spawner: Spawner) -> ! {
         if r.info.dst_address == THE_ADDRESS {
             if !esp_now.peer_exists(&r.info.src_address) {
                 esp_now
-                    .add_peer(PeerInfo {
-                        peer_address: r.info.src_address,
-                        lmk: None,
-                        channel: None,
-                        encrypt: false,
-                    })
+                    .add_peer(PeerInfo {peer_address:r.info.src_address,lmk:None,channel:None,encrypt:false, interface: EspNowWifiInterface::Ap}
+                    )
                     .unwrap();
             }
         }

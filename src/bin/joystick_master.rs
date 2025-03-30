@@ -8,7 +8,7 @@
 #![no_std]
 #![no_main]
 
-use core::{cell::RefCell, fmt::Write};
+use core::fmt::Write;
 
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Ticker, Timer};
@@ -17,11 +17,16 @@ use esp_backtrace as _;
 use esp_hal::{
     analog::adc::{Adc, AdcConfig, Attenuation},
     clock::CpuClock,
+    peripheral::Peripheral,
     rng::Rng,
     timer::timg::TimerGroup,
 };
 use esp_println::println;
-use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
+use esp_wifi::{
+    EspWifiController,
+    esp_now::{EspNowWifiInterface, PeerInfo},
+    init,
+};
 use heapless::String;
 use robo_remote::{self as _, mk_static};
 
@@ -51,7 +56,14 @@ async fn main(_spawner: Spawner) -> ! {
     );
 
     let wifi = peripherals.WIFI;
-    let mut esp_now = esp_wifi::esp_now::EspNow::new(&esp_wifi_ctrl, wifi).unwrap();
+    let (mut controller, interfaces) = esp_wifi::wifi::new(&esp_wifi_ctrl, wifi).unwrap();
+    controller
+        .set_mode(esp_wifi::wifi::WifiMode::ApSta)
+        .unwrap();
+    controller.start().unwrap();
+
+    let mut esp_now = interfaces.esp_now;
+
     println!("esp-now version {}", esp_now.version().unwrap());
 
     use esp_hal::timer::systimer::SystemTimer;
@@ -66,13 +78,14 @@ async fn main(_spawner: Spawner) -> ! {
 
     let mut pin = adc1_config.enable_pin(analog_pin, Attenuation::_11dB);
 
-    let adc = RefCell::new(peripherals.ADC1);
-    let mut adc1 = Adc::new(adc.borrow_mut(), adc1_config).into_async();
+    let adc = peripherals.ADC1;
+    let mut adc1 = Adc::new(unsafe { adc.clone_unchecked() }, adc1_config).into_async();
 
-    let analog_pin2 = peripherals.GPIO2;
     let mut adc12_config = AdcConfig::new();
+    let analog_pin2 = peripherals.GPIO2;
+
     let mut pin2 = adc12_config.enable_pin(analog_pin2, Attenuation::_11dB);
-    let mut adc12 = Adc::new(adc.borrow_mut(), adc12_config);
+    let mut adc12 = Adc::new(adc, adc12_config).into_async();
 
     loop {
         let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
@@ -85,13 +98,14 @@ async fn main(_spawner: Spawner) -> ! {
                     lmk: None,
                     channel: None,
                     encrypt: false,
+                    interface: EspNowWifiInterface::Ap,
                 })
                 .unwrap();
         }
 
         let y = adc12
             .read_oneshot(&mut pin2)
-            .unwrap_or_default()
+            .await
             .saturating_sub(ADC_SHIFT);
         println!("Y value: {}", y);
         Timer::after(Duration::from_millis(250)).await;
