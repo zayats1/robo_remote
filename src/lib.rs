@@ -2,7 +2,7 @@
 
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
-    esp_println::dbg!("{?:}",info);
+    esp_println::dbg!("{?:}", info);
     loop {}
 }
 // from esp32 examples
@@ -15,4 +15,16 @@ macro_rules! mk_static {
         let x = STATIC_CELL.uninit().write(($val));
         x
     }};
+}
+
+// from arduino
+
+pub trait Map {
+    fn map(self, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32;
+}
+
+impl Map for f32 {
+    fn map(self, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
+        (self - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    }
 }

@@ -28,7 +28,7 @@ use esp_wifi::{
     init,
 };
 use heapless::String;
-use robo_remote::{self as _, mk_static};
+use robo_remote::{self as _, Map, mk_static};
 
 const ADC_SHIFT: u16 = 2144; // to obtain zero at the minimum of a joystick range
 
@@ -89,7 +89,6 @@ async fn main(_spawner: Spawner) -> ! {
 
     loop {
         let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
-        println!("X value: {}", x);
 
         if !esp_now.peer_exists(&PEER_ADDRESS) {
             esp_now
@@ -107,10 +106,19 @@ async fn main(_spawner: Spawner) -> ! {
             .read_oneshot(&mut pin2)
             .await
             .saturating_sub(ADC_SHIFT);
-        println!("Y value: {}", y);
+
         Timer::after(Duration::from_millis(250)).await;
 
         data.clear();
+
+        let x = ((x / 10) as f32)
+            .map(0.0, 176.0, -255.0, 255.0)
+            .clamp(-255.0, 255.0);
+        let y = ((y / 10) as f32)
+            .map(0.0, 176.0, -255.0, 255.0)
+            .clamp(-255.0, 255.0);
+        println!("X value: {}", x);
+        println!("Y value: {}", y);
         writeln!(&mut data, "X:{};Y:{};", x, y).unwrap(); // todo
         let status = esp_now.send_async(&PEER_ADDRESS, data.as_bytes()).await;
         println!("Send broadcast status: {:?}", status);
