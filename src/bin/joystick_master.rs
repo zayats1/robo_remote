@@ -11,7 +11,7 @@
 use core::{cell::RefCell, fmt::Write};
 
 use embassy_executor::Spawner;
-use embassy_time::{Duration, Ticker, Timer};
+use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::{
@@ -91,10 +91,6 @@ async fn main(_spawner: Spawner) -> ! {
                 .unwrap();
         }
 
-        Timer::after(Duration::from_millis(250)).await;
-
-        data.clear();
-
         let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
         println!("X value: {}", x);
 
@@ -112,6 +108,7 @@ async fn main(_spawner: Spawner) -> ! {
             .clamp(-255.0, 255.0);
         println!("X normed: {}", x);
         println!("Y normed: {}", y);
+        data.clear();
         writeln!(&mut data, "X:{};Y:{};", x, y).unwrap(); // todo
         let status = esp_now.send_async(&PEER_ADDRESS, data.as_bytes()).await;
         println!("Send broadcast status: {:?}", status);
