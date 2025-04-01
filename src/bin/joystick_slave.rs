@@ -51,7 +51,7 @@ async fn main(_spawner: Spawner) -> ! {
     );
 
     let wifi = peripherals.WIFI;
-    let mut esp_now = esp_wifi::esp_now::EspNow::new(&esp_wifi_ctrl, wifi).unwrap();
+    let mut esp_now = esp_wifi::esp_now::EspNow::new(esp_wifi_ctrl, wifi).unwrap();
     println!("esp-now version {}", esp_now.version().unwrap());
 
     use esp_hal::timer::systimer::SystemTimer;
@@ -67,13 +67,13 @@ async fn main(_spawner: Spawner) -> ! {
         if r.info.dst_address == THE_ADDRESS {
             if !esp_now.peer_exists(&r.info.src_address) {
                 esp_now
-                    .add_peer(PeerInfo {
-                        peer_address: r.info.src_address,
-                        lmk: None,
-                        channel: None,
-                        encrypt: false,
-                    })
-                    .unwrap();
+                                .add_peer(PeerInfo {
+                                    peer_address: r.info.src_address,
+                                    lmk: None,
+                                    channel: None,
+                                    encrypt: false,
+                                })
+                                .unwrap();
             }
         }
         Timer::after(INTERVAL).await;
