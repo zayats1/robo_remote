@@ -11,7 +11,7 @@
 use core::str;
 
 use embassy_executor::Spawner;
-use embassy_time::Timer;
+use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
@@ -24,6 +24,10 @@ use robo_remote::{self as _, mk_static};
 
 
 const THE_ADDRESS: [u8;6] = [0x54u8,0x32,0x04,0x32,0xf2,0xb8];
+
+
+// so MCU shouldn't halt
+const INTERVAL: Duration = Duration::from_nanos(1);
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -72,6 +76,6 @@ async fn main(_spawner: Spawner) -> ! {
                     .unwrap();
             }
         }
-        Timer::after_millis(2).await;
+        Timer::after(INTERVAL).await;
     }
 }

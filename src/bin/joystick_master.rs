@@ -29,9 +29,11 @@ const ADC_SHIFT: u16 = 2144; // to obtain zero at the minimum of a joystick rang
 
 const PEER_ADDRESS: [u8; 6] = [0x54, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 
+
 #[cfg(debug_assertions)]
 const INTERVAL: Duration = Duration::from_millis(500);
 
+// so MCU shouldn't halt
 #[cfg(not(debug_assertions))]
 const INTERVAL: Duration = Duration::from_nanos(10);
 
@@ -57,7 +59,7 @@ async fn main(_spawner: Spawner) -> ! {
     );
 
     let wifi = peripherals.WIFI;
-    let mut esp_now = esp_wifi::esp_now::EspNow::new(&esp_wifi_ctrl, wifi).unwrap();
+    let mut esp_now = esp_wifi::esp_now::EspNow::new(esp_wifi_ctrl, wifi).unwrap();
     println!("esp-now version {}", esp_now.version().unwrap());
 
     use esp_hal::timer::systimer::SystemTimer;
