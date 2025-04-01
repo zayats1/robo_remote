@@ -16,3 +16,17 @@ macro_rules! mk_static {
         x
     }};
 }
+
+
+// from arduino
+
+pub trait Map {
+    fn map(self, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32;
+}
+
+impl Map for f32 {
+    #[inline]
+    fn map(self, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
+        (self - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    }
+}
