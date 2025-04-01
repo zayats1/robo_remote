@@ -64,17 +64,15 @@ async fn main(_spawner: Spawner) -> ! {
             "Received {:?}",
             str::from_utf8(r.data()).unwrap_or("Data is not received properly")
         );
-        if r.info.dst_address == THE_ADDRESS {
-            if !esp_now.peer_exists(&r.info.src_address) {
-                esp_now
-                                .add_peer(PeerInfo {
-                                    peer_address: r.info.src_address,
-                                    lmk: None,
-                                    channel: None,
-                                    encrypt: false,
-                                })
-                                .unwrap();
-            }
+        if r.info.dst_address == THE_ADDRESS && !esp_now.peer_exists(&r.info.src_address) {
+            esp_now
+                            .add_peer(PeerInfo {
+                                peer_address: r.info.src_address,
+                                lmk: None,
+                                channel: None,
+                                encrypt: false,
+                            })
+                            .unwrap();
         }
         Timer::after(INTERVAL).await;
     }
