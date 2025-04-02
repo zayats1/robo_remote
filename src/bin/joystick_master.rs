@@ -17,6 +17,7 @@ use esp_backtrace as _;
 use esp_hal::{
     analog::adc::{Adc, AdcConfig, Attenuation},
     clock::CpuClock,
+    peripherals::ADC1,
     rng::Rng,
     timer::timg::TimerGroup,
 };
@@ -29,7 +30,6 @@ const ADC_SHIFT: u16 = 2144; // to obtain zero at the minimum of a joystick rang
 
 const PEER_ADDRESS: [u8; 6] = [0x54, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 
-
 #[cfg(debug_assertions)]
 const INTERVAL: Duration = Duration::from_millis(500);
 
@@ -37,8 +37,7 @@ const INTERVAL: Duration = Duration::from_millis(500);
 #[cfg(not(debug_assertions))]
 const INTERVAL: Duration = Duration::from_nanos(10);
 
-
-const WIFI_CHANNEL:u8 = 3;
+const WIFI_CHANNEL: u8 = 3;
 // TODO: master address
 #[esp_hal_embassy::main]
 async fn main(_spawner: Spawner) -> ! {
@@ -73,13 +72,19 @@ async fn main(_spawner: Spawner) -> ! {
     let analog_pin = peripherals.GPIO1;
     let mut adc1_config = AdcConfig::new();
 
-    let mut pin = adc1_config.enable_pin(analog_pin, Attenuation::_11dB);
+    // type AdcCal = esp_hal::analog::adc::AdcCalBasic<esp_hal::peripherals::ADC1>;
+    // type AdcCal = esp_hal::analog::adc::AdcCalLine<ADC1>;
+    type AdcCal = esp_hal::analog::adc::AdcCalCurve<ADC1>;
+    let mut pin = adc1_config.enable_pin_with_cal::<_, AdcCal>(analog_pin, Attenuation::_11dB);
 
     let adc = RefCell::new(peripherals.ADC1);
+
+    
     let mut adc1 = Adc::new(adc.borrow_mut(), adc1_config).into_async();
 
     let analog_pin2 = peripherals.GPIO2;
     let mut adc12_config = AdcConfig::new();
+
     let mut pin2 = adc12_config.enable_pin(analog_pin2, Attenuation::_11dB);
     let mut adc12 = Adc::new(adc.borrow_mut(), adc12_config);
 
@@ -95,7 +100,7 @@ async fn main(_spawner: Spawner) -> ! {
                 .unwrap();
         }
 
-        let x = adc1.read_oneshot(&mut pin).await.saturating_sub(ADC_SHIFT);
+        let x = adc1.read_oneshot(&mut pin).await;
         println!("X value: {}", x);
 
         let y = adc12
