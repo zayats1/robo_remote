@@ -37,6 +37,8 @@ const INTERVAL: Duration = Duration::from_millis(500);
 #[cfg(not(debug_assertions))]
 const INTERVAL: Duration = Duration::from_nanos(10);
 
+
+const WIFI_CHANNEL:u8 = 3;
 // TODO: master address
 #[esp_hal_embassy::main]
 async fn main(_spawner: Spawner) -> ! {
@@ -65,7 +67,7 @@ async fn main(_spawner: Spawner) -> ! {
     use esp_hal::timer::systimer::SystemTimer;
     let systimer = SystemTimer::new(peripherals.SYSTIMER);
     esp_hal_embassy::init(systimer.alarm0);
-
+    esp_now.set_channel(WIFI_CHANNEL).unwrap();
     let mut data: String<64> = String::new();
 
     let analog_pin = peripherals.GPIO1;

@@ -24,7 +24,7 @@ use robo_remote::{self as _, mk_static};
 
 
 const THE_ADDRESS: [u8;6] = [0x54u8,0x32,0x04,0x32,0xf2,0xb8];
-
+const WIFI_CHANNEL:u8 = 3;
 
 // so MCU shouldn't halt
 const INTERVAL: Duration = Duration::from_nanos(1);
@@ -53,7 +53,7 @@ async fn main(_spawner: Spawner) -> ! {
     let wifi = peripherals.WIFI;
     let mut esp_now = esp_wifi::esp_now::EspNow::new(esp_wifi_ctrl, wifi).unwrap();
     println!("esp-now version {}", esp_now.version().unwrap());
-
+    esp_now.set_channel(WIFI_CHANNEL).unwrap();
     use esp_hal::timer::systimer::SystemTimer;
     let systimer = SystemTimer::new(peripherals.SYSTIMER);
     esp_hal_embassy::init(systimer.alarm0);
