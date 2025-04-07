@@ -14,17 +14,18 @@ use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
-use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup};
-use esp_println::println;
-use esp_wifi::{
-    esp_now::PeerInfo,
-    init, EspWifiController,
+use esp_hal::{
+    clock::CpuClock,
+    rng::Rng,
+    timer::timg::TimerGroup,
+    uart::{self, Uart},
 };
+use esp_println::println;
+use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
 use robo_remote::{self as _, mk_static};
 
-
-const THE_ADDRESS: [u8;6] = [0x54u8,0x32,0x04,0x32,0xf2,0xb8];
-const WIFI_CHANNEL:u8 = 3;
+const THE_ADDRESS: [u8; 6] = [0x54u8, 0x32, 0x04, 0x32, 0xf2, 0xb8];
+const WIFI_CHANNEL: u8 = 3;
 
 // so MCU shouldn't halt
 const INTERVAL: Duration = Duration::from_nanos(1);
@@ -58,21 +59,34 @@ async fn main(_spawner: Spawner) -> ! {
     let systimer = SystemTimer::new(peripherals.SYSTIMER);
     esp_hal_embassy::init(systimer.alarm0);
 
+    let mut uart1 = Uart::new(
+        peripherals.UART1,
+        uart::Config::default().with_baudrate(115200),
+    )
+    .unwrap()
+    .with_rx(peripherals.GPIO1)
+    .with_tx(peripherals.GPIO2)
+    .into_async();
+
     loop {
         let r = esp_now.receive_async().await;
-        println!(
-            "Received {:?}",
-            str::from_utf8(r.data()).unwrap_or("Data is not received properly")
-        );
-        if r.info.dst_address == THE_ADDRESS && !esp_now.peer_exists(&r.info.src_address) {
-            esp_now
-                            .add_peer(PeerInfo {
-                                peer_address: r.info.src_address,
-                                lmk: None,
-                                channel: None,
-                                encrypt: false,
-                            })
-                            .unwrap();
+        if r.info.dst_address == THE_ADDRESS {
+            let data = r.data();
+            uart1.write_async(data).await.unwrap();
+            println!(
+                "Received {:?}",
+                str::from_utf8(data).unwrap_or("Data is not received properly")
+            );
+            if !esp_now.peer_exists(&r.info.src_address) {
+                esp_now
+                    .add_peer(PeerInfo {
+                        peer_address: r.info.src_address,
+                        lmk: None,
+                        channel: None,
+                        encrypt: false,
+                    })
+                    .unwrap();
+            }
         }
         Timer::after(INTERVAL).await;
     }
