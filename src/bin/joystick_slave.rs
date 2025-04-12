@@ -8,7 +8,7 @@
 #![no_std]
 #![no_main]
 
-use core::str;
+use core::str::{self};
 
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
@@ -72,11 +72,9 @@ async fn main(_spawner: Spawner) -> ! {
         let r = esp_now.receive_async().await;
         if r.info.dst_address == THE_ADDRESS {
             let data = r.data();
+            let rec = str::from_utf8(data).unwrap_or("Data is not received properly");
             uart1.write_async(data).await.unwrap();
-            println!(
-                "Received {:?}",
-                str::from_utf8(data).unwrap_or("Data is not received properly")
-            );
+            println!("Received {}", rec);
             if !esp_now.peer_exists(&r.info.src_address) {
                 esp_now
                     .add_peer(PeerInfo {

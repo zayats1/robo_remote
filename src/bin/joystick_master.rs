@@ -29,7 +29,6 @@ const ADC_SHIFT: u16 = 2144; // to obtain zero at the minimum of a joystick rang
 
 const PEER_ADDRESS: [u8; 6] = [0x54, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 
-
 #[cfg(debug_assertions)]
 const INTERVAL: Duration = Duration::from_millis(500);
 
@@ -37,8 +36,7 @@ const INTERVAL: Duration = Duration::from_millis(500);
 #[cfg(not(debug_assertions))]
 const INTERVAL: Duration = Duration::from_nanos(10);
 
-
-const WIFI_CHANNEL:u8 = 3;
+const WIFI_CHANNEL: u8 = 3;
 // TODO: master address
 #[esp_hal_embassy::main]
 async fn main(_spawner: Spawner) -> ! {
@@ -113,7 +111,7 @@ async fn main(_spawner: Spawner) -> ! {
         println!("X normed: {}", x);
         println!("Y normed: {}", y);
         data.clear();
-        writeln!(&mut data, "X:{};Y:{};", x, y).unwrap(); // todo
+        writeln!(&mut data, "X:{};\nY:{};", x, y).unwrap(); // todo
         let status = esp_now.send_async(&PEER_ADDRESS, data.as_bytes()).await;
         println!("Send broadcast status: {:?}", status);
         Timer::after(INTERVAL).await;
