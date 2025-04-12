@@ -14,3 +14,7 @@ target = "riscv32imac-unknown-none-elf"
 
 [unstable]
 build-std = ["alloc", "core"]
+
+[alias]
+rb = "run --bin"
+rrb = "run --release --bin"
