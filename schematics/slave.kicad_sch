@@ -1665,10 +1665,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Regulator_Linear:LF33_TO220"
-			(pin_names
-				(offset 0.254)
-			)
+		(symbol "Regulator_Linear:AMS1117-3.3"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1680,7 +1677,7 @@
 					)
 				)
 			)
-			(property "Value" "LF33_TO220"
+			(property "Value" "AMS1117-3.3"
 				(at 0 3.175 0)
 				(effects
 					(font
@@ -1689,18 +1686,8 @@
 					(justify left)
 				)
 			)
-			(property "Footprint" "Package_TO_SOT_THT:TO-220-3_Vertical"
-				(at 0 5.715 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-						(italic yes)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "http://www.st.com/content/ccc/resource/technical/document/datasheet/c4/0e/7e/2a/be/bc/4c/bd/CD00000546.pdf/files/CD00000546.pdf/jcr:content/translations/en.CD00000546.pdf"
-				(at 0 -1.27 0)
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-223-3_TabPin2"
+				(at 0 5.08 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1708,7 +1695,16 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Low-drop Voltage Regulator, Io up to 500mA, Fixed Vo 3.3V, TO-220"
+			(property "Datasheet" "http://www.advanced-monolithic.com/pdf/ds1117.pdf"
+				(at 2.54 -6.35 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1717,7 +1713,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "LDO regulator voltage"
+			(property "ki_keywords" "linear regulator ldo fixed positive"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1726,7 +1722,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "TO?220*"
+			(property "ki_fp_filters" "SOT?223*TabPin2*"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1735,10 +1731,10 @@
 					(hide yes)
 				)
 			)
-			(symbol "LF33_TO220_0_1"
+			(symbol "AMS1117-3.3_0_1"
 				(rectangle
-					(start -5.08 1.905)
-					(end 5.08 -5.08)
+					(start -5.08 -5.08)
+					(end 5.08 1.905)
 					(stroke
 						(width 0.254)
 						(type default)
@@ -1748,7 +1744,7 @@
 					)
 				)
 			)
-			(symbol "LF33_TO220_1_1"
+			(symbol "AMS1117-3.3_1_1"
 				(pin power_in line
 					(at -7.62 0 0)
 					(length 2.54)
@@ -1759,7 +1755,7 @@
 							)
 						)
 					)
-					(number "1"
+					(number "3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1777,7 +1773,7 @@
 							)
 						)
 					)
-					(number "2"
+					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1795,7 +1791,7 @@
 							)
 						)
 					)
-					(number "3"
+					(number "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2209,11 +2205,23 @@
 			(embedded_fonts no)
 		)
 	)
+	(rectangle
+		(start 120.65 16.51)
+		(end 170.18 49.53)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 8d14cd86-56a3-47b5-88fa-47762f26cc11)
+	)
 	(junction
-		(at 161.29 29.21)
+		(at 76.2 43.18)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "5fcf73f2-655a-464a-adba-a0b340a232bd")
+		(uuid "301272ec-5342-4136-967b-00efd4a6b4c1")
 	)
 	(junction
 		(at 127 29.21)
@@ -2232,6 +2240,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "afd49e3b-f885-4208-94a6-5e45c60e3c6a")
+	)
+	(junction
+		(at 157.48 29.21)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ebd07ff3-6070-40fc-b676-811469e84439")
 	)
 	(wire
 		(pts
@@ -2275,6 +2289,16 @@
 	)
 	(wire
 		(pts
+			(xy 76.2 43.18) (xy 76.2 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "275c374f-514a-44ab-b120-bf87be768d8f")
+	)
+	(wire
+		(pts
 			(xy 107.95 109.22) (xy 134.62 109.22)
 		)
 		(stroke
@@ -2302,6 +2326,16 @@
 			(type default)
 		)
 		(uuid "494d6c08-68c1-43cb-bef5-d46694d4ab3f")
+	)
+	(wire
+		(pts
+			(xy 157.48 29.21) (xy 180.34 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4a6c638d-d117-40bb-bed0-e799a4cfa33f")
 	)
 	(wire
 		(pts
@@ -2335,16 +2369,6 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 29.21) (xy 170.18 29.21)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "68e25644-a6fb-4416-b796-9f2bfc3df640")
-	)
-	(wire
-		(pts
 			(xy 107.95 114.3) (xy 134.62 114.3)
 		)
 		(stroke
@@ -2352,6 +2376,16 @@
 			(type default)
 		)
 		(uuid "78213c4f-be3e-414f-a39f-a395aa0fb051")
+	)
+	(wire
+		(pts
+			(xy 76.2 43.18) (xy 127 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "78845e83-4c76-4dc3-b3c5-7e2e25dd41a4")
 	)
 	(wire
 		(pts
@@ -2365,7 +2399,7 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 29.21) (xy 161.29 34.29)
+			(xy 157.48 29.21) (xy 157.48 34.29)
 		)
 		(stroke
 			(width 0)
@@ -2415,7 +2449,7 @@
 	)
 	(wire
 		(pts
-			(xy 142.24 43.18) (xy 161.29 43.18)
+			(xy 142.24 43.18) (xy 157.48 43.18)
 		)
 		(stroke
 			(width 0)
@@ -2425,7 +2459,7 @@
 	)
 	(wire
 		(pts
-			(xy 170.18 29.21) (xy 170.18 27.94)
+			(xy 180.34 29.21) (xy 180.34 27.94)
 		)
 		(stroke
 			(width 0)
@@ -2445,7 +2479,7 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 41.91) (xy 161.29 43.18)
+			(xy 157.48 41.91) (xy 157.48 43.18)
 		)
 		(stroke
 			(width 0)
@@ -2515,7 +2549,7 @@
 	)
 	(wire
 		(pts
-			(xy 149.86 29.21) (xy 161.29 29.21)
+			(xy 149.86 29.21) (xy 157.48 29.21)
 		)
 		(stroke
 			(width 0)
@@ -2552,16 +2586,6 @@
 			(type default)
 		)
 		(uuid "e142fcc9-8b51-421f-9b80-6d6cd43ee439")
-	)
-	(wire
-		(pts
-			(xy 127 43.18) (xy 76.2 43.18)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e308ab09-7b89-4e8d-b0ea-ed95764272e3")
 	)
 	(wire
 		(pts
@@ -2714,8 +2738,79 @@
 		)
 	)
 	(symbol
+		(lib_id "Regulator_Linear:AMS1117-3.3")
+		(at 142.24 29.21 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1753a601-e7ad-4307-9d70-2caf5e19e649")
+		(property "Reference" "U1"
+			(at 142.24 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "AMS1117-3.3"
+			(at 142.24 25.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-223-3_TabPin2"
+			(at 142.24 24.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.advanced-monolithic.com/pdf/ds1117.pdf"
+			(at 144.78 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223"
+			(at 142.24 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "6b2e6787-f622-45fb-8737-5a0cb72115d0")
+		)
+		(pin "1"
+			(uuid "a400caa4-27eb-4399-b36c-85631eba06a1")
+		)
+		(pin "2"
+			(uuid "73f9f4a0-c5f5-4b04-a496-aaef390d4ef8")
+		)
+		(instances
+			(project ""
+				(path "/b33adb57-441b-4653-995a-012b7a2cdd51"
+					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
-		(at 142.24 43.18 0)
+		(at 76.2 48.26 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2724,7 +2819,7 @@
 		(fields_autoplaced yes)
 		(uuid "19be9ef8-0921-470d-995b-5869a1e17785")
 		(property "Reference" "#PWR06"
-			(at 142.24 49.53 0)
+			(at 76.2 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2733,7 +2828,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 142.24 48.26 0)
+			(at 76.2 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2741,7 +2836,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 142.24 43.18 0)
+			(at 76.2 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2750,7 +2845,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 142.24 43.18 0)
+			(at 76.2 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2759,7 +2854,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 142.24 43.18 0)
+			(at 76.2 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3123,7 +3218,7 @@
 	)
 	(symbol
 		(lib_id "Device:C_Polarized")
-		(at 161.29 38.1 0)
+		(at 157.48 38.1 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3132,7 +3227,7 @@
 		(fields_autoplaced yes)
 		(uuid "84786b58-be0d-44b8-9c59-e86e8cd3a6ff")
 		(property "Reference" "C2"
-			(at 165.1 35.9409 0)
+			(at 161.29 35.9409 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3141,7 +3236,7 @@
 			)
 		)
 		(property "Value" "2.2uf"
-			(at 165.1 38.4809 0)
+			(at 161.29 38.4809 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3150,7 +3245,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 162.2552 41.91 0)
+			(at 158.4452 41.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3159,7 +3254,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 161.29 38.1 0)
+			(at 157.48 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3168,7 +3263,7 @@
 			)
 		)
 		(property "Description" "Polarized capacitor"
-			(at 161.29 38.1 0)
+			(at 157.48 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3193,7 +3288,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 170.18 27.94 0)
+		(at 180.34 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3202,7 +3297,7 @@
 		(fields_autoplaced yes)
 		(uuid "a10e9c11-5039-412b-9e04-95bab992bea9")
 		(property "Reference" "#PWR07"
-			(at 170.18 31.75 0)
+			(at 180.34 31.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3211,7 +3306,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 170.18 22.86 0)
+			(at 180.34 22.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3219,7 +3314,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 170.18 27.94 0)
+			(at 180.34 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3228,7 +3323,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 170.18 27.94 0)
+			(at 180.34 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3237,7 +3332,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 170.18 27.94 0)
+			(at 180.34 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3252,78 +3347,6 @@
 			(project ""
 				(path "/b33adb57-441b-4653-995a-012b7a2cdd51"
 					(reference "#PWR07")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Regulator_Linear:LF33_TO220")
-		(at 142.24 29.21 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "bc195b3a-9be4-4b5f-8e7c-4313b0ac3d25")
-		(property "Reference" "U1"
-			(at 142.24 22.86 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "LF33_TO220"
-			(at 142.24 25.4 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_THT:TO-220-3_Vertical"
-			(at 142.24 23.495 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://www.st.com/content/ccc/resource/technical/document/datasheet/c4/0e/7e/2a/be/bc/4c/bd/CD00000546.pdf/files/CD00000546.pdf/jcr:content/translations/en.CD00000546.pdf"
-			(at 142.24 30.48 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Low-drop Voltage Regulator, Io up to 500mA, Fixed Vo 3.3V, TO-220"
-			(at 142.24 29.21 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "3"
-			(uuid "3dd06793-0ace-4394-81ed-503462dcb928")
-		)
-		(pin "2"
-			(uuid "372435c9-e2c6-4679-be60-9d4364effb6f")
-		)
-		(pin "1"
-			(uuid "c41da8f5-3ce8-419d-bfaa-c6679c3ab113")
-		)
-		(instances
-			(project ""
-				(path "/b33adb57-441b-4653-995a-012b7a2cdd51"
-					(reference "U1")
 					(unit 1)
 				)
 			)
