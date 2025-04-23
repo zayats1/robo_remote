@@ -15,7 +15,11 @@ use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::{
-    clock::CpuClock, mcpwm::{operator::PwmPinConfig, timer::PwmWorkingMode, McPwm, PeripheralClockConfig}, peripherals::GPIO, rng::Rng, time::Rate, timer::timg::TimerGroup, uart::{self, Uart}
+    clock::CpuClock,
+    mcpwm::{McPwm, PeripheralClockConfig, operator::PwmPinConfig, timer::PwmWorkingMode},
+    rng::Rng,
+    time::Rate,
+    timer::timg::TimerGroup,
 };
 use esp_println::println;
 use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
@@ -56,35 +60,33 @@ async fn main(_spawner: Spawner) -> ! {
     let systimer = SystemTimer::new(peripherals.SYSTIMER);
     esp_hal_embassy::init(systimer.alarm0);
 
+    // initialize peripheral
+    let clock_cfg = PeripheralClockConfig::with_frequency(Rate::from_mhz(32)).unwrap();
+    let mut mcpwm = McPwm::new(peripherals.MCPWM0, clock_cfg);
 
+    // connect operator0 to timer0
+    mcpwm.operator0.set_timer(&mcpwm.timer0);
+    // connect operator0 to pin
+    let mut pwm_pin = mcpwm
+        .operator0
+        .with_pin_a(peripherals.GPIO18, PwmPinConfig::UP_ACTIVE_HIGH);
 
-// initialize peripheral
-let clock_cfg = PeripheralClockConfig::with_frequency(Rate::from_mhz(32)).unwrap();
-let mut mcpwm = McPwm::new(peripherals.MCPWM0, clock_cfg);
+    // start timer with timestamp values in the range of 0..=99 and a frequency
+    // of 20 kHz
+    let timer_clock_cfg = clock_cfg
+        .timer_clock_with_frequency(99, PwmWorkingMode::Increase, Rate::from_khz(20))
+        .unwrap();
+    mcpwm.timer0.start(timer_clock_cfg);
 
-// connect operator0 to timer0
-mcpwm.operator0.set_timer(&mcpwm.timer0);
-// connect operator0 to pin
-let mut pwm_pin = mcpwm
-    .operator0
-    .with_pin_a(peripherals.GPIO18, PwmPinConfig::UP_ACTIVE_HIGH);
-
-// start timer with timestamp values in the range of 0..=99 and a frequency
-// of 20 kHz
-let timer_clock_cfg = clock_cfg
-    .timer_clock_with_frequency(99, PwmWorkingMode::Increase,
-Rate::from_khz(20)).unwrap(); mcpwm.timer0.start(timer_clock_cfg);
-
-// pin will be high 50% of the time
-pwm_pin.set_timestamp(100);
-
+    // pin will be high 50% of the time
+    pwm_pin.set_timestamp(100);
 
     loop {
         let r = esp_now.receive_async().await;
         if r.info.dst_address == THE_ADDRESS {
             let data = r.data();
             let rec = str::from_utf8(data).unwrap_or("Data is not received properly");
-    
+
             println!("Received {}", rec);
             if !esp_now.peer_exists(&r.info.src_address) {
                 esp_now
