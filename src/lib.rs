@@ -1,5 +1,8 @@
 #![no_std]
 
+pub mod protocol;
+
+
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     esp_println::dbg!("{?:}",info);
@@ -30,3 +33,6 @@ impl Map for f32 {
         (self - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
     }
 }
+    
+
+
