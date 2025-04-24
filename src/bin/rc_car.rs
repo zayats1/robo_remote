@@ -111,7 +111,7 @@ async fn main(_spawner: Spawner) -> ! {
             let data = rec.data();
             let received = str::from_utf8(data);
 
-            println!("Received {:?}", rec);
+           // println!("Received {:?}", rec);
             if !esp_now.peer_exists(&rec.info.src_address) {
                 esp_now
                     .add_peer(PeerInfo {
@@ -131,7 +131,10 @@ async fn main(_spawner: Spawner) -> ! {
 
         return if let Some(received) = received.flatten() {
             match parse(received) {
-                Ok(message) => Some(message),
+                Ok(message) => {
+                    println!("Received {:?}", message);
+                    Some(message)
+                },
                 Err(err) => {
                     println!("{}", err);
                     None
@@ -158,8 +161,8 @@ async fn main(_spawner: Spawner) -> ! {
         if let Some(message) = received {
             match message {
                 // Todo: make speed stable
-                message::Message::LeftSpeed(speed) => left_motor.run(speed as i16),
-                message::Message::RightSpeed(speed) => right_motor.run(speed as i16),
+                message::Message::LeftSpeed(speed) => left_motor.run(speed.clamp(-99.0, 99.0) as i16),
+                message::Message::RightSpeed(speed) => right_motor.run(speed.clamp(-99.0, 99.0) as i16),
                 message::Message::Stop => {
                     left_motor.stop();
                     right_motor.stop();

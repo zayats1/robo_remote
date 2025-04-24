@@ -66,12 +66,12 @@ where
 
         let (_, _) = match self.direction {
             Direction::Forward => (
-                self.forward_pin.set_duty_cycle_percent(speed as u8),
+                self.forward_pin.set_duty_cycle_percent(self.speed as u8),
                 self.backward_pin.set_duty_cycle_percent(0),
             ),
             Direction::Backward => (
                 self.forward_pin.set_duty_cycle_percent(0),
-                self.backward_pin.set_duty_cycle_percent(speed as u8),
+                self.backward_pin.set_duty_cycle_percent(self.speed as u8),
             ),
         };
     }
