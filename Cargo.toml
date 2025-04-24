@@ -51,6 +51,7 @@ static_cell = { version = "2.1.0"}
 log = "0.4.27"
 embassy-futures = "0.1.1"
 function_name = "0.3.0"
+embedded-hal = "1.0.0"
 
 
 # It is necessary to build with optimization level 2 or 3 since
