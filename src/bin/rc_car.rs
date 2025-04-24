@@ -11,7 +11,7 @@
 use core::str::{self};
 
 use embassy_executor::Spawner;
-use embassy_futures::select::{select, Either};
+use embassy_futures::select::{Either, select};
 use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
@@ -35,8 +35,7 @@ const WIFI_CHANNEL: u8 = 3;
 // so MCU shouldn't halt
 const INTERVAL: Duration = Duration::from_nanos(1);
 
-const TIMEOUT:Duration = Duration::from_secs(5);
-
+const TIMEOUT: Duration = Duration::from_secs(5);
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -127,18 +126,16 @@ async fn main(_spawner: Spawner) -> ! {
     };
 
     loop {
-        let res = select(receive_data(),{
-            Timer::after(TIMEOUT).into_future()
-        }).await;
+        let res = select(receive_data(), Timer::after(TIMEOUT).into_future() ).await;
 
         let received = match res {
-            Either::First(rec) =>rec,
+            Either::First(rec) => rec,
             Either::Second(_) => {
                 println!("Disconnected");
                 None
-            },
+            }
         };
-        
+
         if let Some(message) = received {
             match message {
                 message::Message::LeftSpeed(_) => todo!(),
@@ -150,5 +147,3 @@ async fn main(_spawner: Spawner) -> ! {
         Timer::after(INTERVAL).await;
     }
 }
-
-
