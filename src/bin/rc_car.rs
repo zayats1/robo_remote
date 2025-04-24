@@ -76,20 +76,20 @@ async fn main(_spawner: Spawner) -> ! {
     mcpwm.operator0.set_timer(&mcpwm.timer0);
     mcpwm.operator1.set_timer(&mcpwm.timer1);
 
-    // connect operator0 to pin
+ 
     let pwm_pins = mcpwm.operator0.with_pins(
-        peripherals.GPIO9,
+        peripherals.GPIO4,
         PwmPinConfig::UP_ACTIVE_HIGH,
-        peripherals.GPIO8,
+        peripherals.GPIO3,
         PwmPinConfig::UP_ACTIVE_HIGH,
     );
     let mut left_motor = Motor::new(pwm_pins.0, pwm_pins.1);
     
 
     let pwm_pins2 = mcpwm.operator1.with_pins(
-        peripherals.GPIO7,
-        PwmPinConfig::UP_ACTIVE_HIGH,
         peripherals.GPIO6,
+        PwmPinConfig::UP_ACTIVE_HIGH,
+        peripherals.GPIO5,
         PwmPinConfig::UP_ACTIVE_HIGH,
     );
     let mut right_motor = Motor::new(pwm_pins2.0, pwm_pins2.1);
