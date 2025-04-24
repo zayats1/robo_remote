@@ -107,7 +107,7 @@ async fn main(_spawner: Spawner) -> ! {
             .clamp(-100.0, 100.0);
         let y = ((y / 10) as f32)
             .map(0.0, 176.0, -100.0, 100.0)
-            .clamp(100.0, 100.0);
+            .clamp(-100.0, 100.0);
         println!("X normed: {}", x);
         println!("Y normed: {}", y);
         data.clear();
