@@ -110,8 +110,13 @@ async fn main(_spawner: Spawner) -> ! {
             .clamp(-100.0, 100.0);
         println!("X normed: {}", x);
         println!("Y normed: {}", y);
+
         data.clear();
-        writeln!(&mut data, "LSPEED:{};\nRSPEED:{};", x, y).unwrap(); // todo
+        writeln!(&mut data, "LSPEED:{};", x).unwrap(); // todo
+        let status = esp_now.send_async(&PEER_ADDRESS, data.as_bytes()).await;
+        println!("Send broadcast status: {:?}", status);
+        data.clear();
+        writeln!(&mut data, "RSPEED:{};", y).unwrap(); // todo
         let status = esp_now.send_async(&PEER_ADDRESS, data.as_bytes()).await;
         println!("Send broadcast status: {:?}", status);
         Timer::after(INTERVAL).await;
