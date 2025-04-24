@@ -37,7 +37,8 @@ const WIFI_CHANNEL: u8 = 3;
 // so MCU shouldn't halt
 const INTERVAL: Duration = Duration::from_nanos(1);
 
-const TIMEOUT: Duration = Duration::from_secs(5);
+// Is it enough time to reconnect/react?
+const TIMEOUT: Duration = Duration::from_secs(1);
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -87,9 +88,9 @@ async fn main(_spawner: Spawner) -> ! {
     
 
     let pwm_pins2 = mcpwm.operator1.with_pins(
-        peripherals.GPIO6,
-        PwmPinConfig::UP_ACTIVE_HIGH,
         peripherals.GPIO5,
+        PwmPinConfig::UP_ACTIVE_HIGH,
+        peripherals.GPIO6,
         PwmPinConfig::UP_ACTIVE_HIGH,
     );
     let mut right_motor = Motor::new(pwm_pins2.0, pwm_pins2.1);
