@@ -11,6 +11,7 @@
 use core::str::{self};
 
 use embassy_executor::Spawner;
+use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
@@ -23,13 +24,19 @@ use esp_hal::{
 };
 use esp_println::println;
 use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
-use robo_remote::{self as _, mk_static, protocol::{message, parser::parse}};
+use robo_remote::{
+    self as _, mk_static,
+    protocol::{message, parser::parse},
+};
 
 const THE_ADDRESS: [u8; 6] = [0x54u8, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 const WIFI_CHANNEL: u8 = 3;
 
 // so MCU shouldn't halt
 const INTERVAL: Duration = Duration::from_nanos(1);
+
+const TIMEOUT:Duration = Duration::from_secs(5);
+
 
 // TODO: master address
 #[esp_hal_embassy::main]
@@ -81,62 +88,67 @@ async fn main(_spawner: Spawner) -> ! {
     // pin will be high 50% of the time
     pwm_pin.set_timestamp(100);
 
+    // TODO: timeout
+    let mut receive_data = async move || {
+        let rec = esp_now.receive_async().await;
+        let received = if rec.info.dst_address == THE_ADDRESS {
+            let data = rec.data();
+            let received = str::from_utf8(data);
 
-
-
-
-        let mut receive_data = async move || {
-            let rec = esp_now.receive_async().await;
-            let received = if rec.info.dst_address == THE_ADDRESS {
-                let data = rec.data();
-                let received = str::from_utf8(data);
-    
-                println!("Received {:?}", rec);
-                if !esp_now.peer_exists(&rec.info.src_address) {
-                    esp_now
-                        .add_peer(PeerInfo {
-                            peer_address: rec.info.src_address,
-                            lmk: None,
-                            channel: None,
-                            encrypt: false,
-                        })
-                        .unwrap();
-                }
-    
-                Some(received.ok())
-            } else {
-                println!("Receiving error");
-                None
-            };
-    
-            return if let Some(received) = received.flatten() {
-                match parse(received) {
-                    Ok(message) => Some(message),
-                    Err(err) => {
-                        println!("{}",err);
-                        None
-                    },
-                }
-            } else {
-                None
-            };
-        };
-    
-        loop {
-            let res = receive_data().await;
-    
-            if let Some(received) = res {
-                 match received {
-                    message::Message::LeftSpeed(_) => todo!(),
-                    message::Message::RightSpeed(_) => todo!(),
-                    message::Message::Stop => todo!(),
-                    }
+            println!("Received {:?}", rec);
+            if !esp_now.peer_exists(&rec.info.src_address) {
+                esp_now
+                    .add_peer(PeerInfo {
+                        peer_address: rec.info.src_address,
+                        lmk: None,
+                        channel: None,
+                        encrypt: false,
+                    })
+                    .unwrap();
             }
-    
-            Timer::after(INTERVAL).await;
+
+            Some(received.ok())
+        } else {
+            println!("Receiving error");
+            None
+        };
+
+        return if let Some(received) = received.flatten() {
+            match parse(received) {
+                Ok(message) => Some(message),
+                Err(err) => {
+                    println!("{}", err);
+                    None
+                }
+            }
+        } else {
+            None
+        };
+    };
+
+    loop {
+        let res = select(receive_data(),{
+            Timer::after(TIMEOUT).into_future()
+        }).await;
+
+        let received = match res {
+            Either::First(rec) =>rec,
+            Either::Second(_) => {
+                println!("Disconnected");
+                None
+            },
+        };
+        
+        if let Some(message) = received {
+            match message {
+                message::Message::LeftSpeed(_) => todo!(),
+                message::Message::RightSpeed(_) => todo!(),
+                message::Message::Stop => todo!(),
+            }
         }
 
-        
+        Timer::after(INTERVAL).await;
     }
+}
 
 
