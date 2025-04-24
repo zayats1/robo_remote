@@ -18,7 +18,6 @@ use esp_hal::{
     clock::CpuClock,
     rng::Rng,
     timer::timg::TimerGroup,
-    uart::{self, Uart},
 };
 use esp_println::println;
 use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
@@ -59,14 +58,6 @@ async fn main(_spawner: Spawner) -> ! {
     let systimer = SystemTimer::new(peripherals.SYSTIMER);
     esp_hal_embassy::init(systimer.alarm0);
 
-    let mut uart1 = Uart::new(
-        peripherals.UART1,
-        uart::Config::default().with_baudrate(115200),
-    )
-    .unwrap()
-    .with_rx(peripherals.GPIO1)
-    .with_tx(peripherals.GPIO2)
-    .into_async();
 
     loop {
         let r = esp_now.receive_async().await;
