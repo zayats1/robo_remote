@@ -21,12 +21,12 @@ where
     T: SetDutyCycle,
     U: SetDutyCycle,
 {
-    pub fn new(forward_pin: T, backward_pin: U, speed: i16, direction: Direction) -> Self {
+    pub fn new(forward_pin: T, backward_pin: U) -> Self {
         Self {
             forward_pin,
             backward_pin,
-            speed,
-            direction,
+            speed:0,
+            direction:Direction::default(),
         }
     }
 

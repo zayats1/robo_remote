@@ -25,7 +25,9 @@ use esp_hal::{
 use esp_println::println;
 use esp_wifi::{EspWifiController, esp_now::PeerInfo, init};
 use robo_remote::{
-    self as _, mk_static,
+    self as _,
+    drivers::motor::Motor,
+    mk_static,
     protocol::{message, parser::parse},
 };
 
@@ -72,20 +74,33 @@ async fn main(_spawner: Spawner) -> ! {
 
     // connect operator0 to timer0
     mcpwm.operator0.set_timer(&mcpwm.timer0);
-    // connect operator0 to pin
-    let mut pwm_pin = mcpwm
-        .operator0
-        .with_pin_a(peripherals.GPIO18, PwmPinConfig::UP_ACTIVE_HIGH);
+    mcpwm.operator1.set_timer(&mcpwm.timer1);
 
+    // connect operator0 to pin
+    let pwm_pins = mcpwm.operator0.with_pins(
+        peripherals.GPIO9,
+        PwmPinConfig::UP_ACTIVE_HIGH,
+        peripherals.GPIO8,
+        PwmPinConfig::UP_ACTIVE_HIGH,
+    );
+    let mut left_motor = Motor::new(pwm_pins.0, pwm_pins.1);
     // start timer with timestamp values in the range of 0..=99 and a frequency
     // of 20 kHz
+
+    let pwm_pins2 = mcpwm.operator1.with_pins(
+        peripherals.GPIO7,
+        PwmPinConfig::UP_ACTIVE_HIGH,
+        peripherals.GPIO6,
+        PwmPinConfig::UP_ACTIVE_HIGH,
+    );
+    let mut right_motor = Motor::new(pwm_pins2.0, pwm_pins2.1);
+
     let timer_clock_cfg = clock_cfg
         .timer_clock_with_frequency(99, PwmWorkingMode::Increase, Rate::from_khz(20))
         .unwrap();
     mcpwm.timer0.start(timer_clock_cfg);
 
     // pin will be high 50% of the time
-    pwm_pin.set_timestamp(100);
 
     // TODO: timeout
     let mut receive_data = async move || {
@@ -126,21 +141,27 @@ async fn main(_spawner: Spawner) -> ! {
     };
 
     loop {
-        let res = select(receive_data(), Timer::after(TIMEOUT).into_future() ).await;
+        let res = select(receive_data(), Timer::after(TIMEOUT).into_future()).await;
 
         let received = match res {
             Either::First(rec) => rec,
             Either::Second(_) => {
                 println!("Disconnected");
+                left_motor.stop();
+                right_motor.stop();
                 None
             }
         };
 
         if let Some(message) = received {
             match message {
-                message::Message::LeftSpeed(_) => todo!(),
-                message::Message::RightSpeed(_) => todo!(),
-                message::Message::Stop => todo!(),
+                // Todo: make speed stable
+                message::Message::LeftSpeed(speed) => left_motor.run(speed as i16),
+                message::Message::RightSpeed(speed) => right_motor.run(speed as i16),
+                message::Message::Stop => {
+                    left_motor.stop();
+                    right_motor.stop();
+                }
             }
         }
 
