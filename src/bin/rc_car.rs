@@ -84,8 +84,7 @@ async fn main(_spawner: Spawner) -> ! {
         PwmPinConfig::UP_ACTIVE_HIGH,
     );
     let mut left_motor = Motor::new(pwm_pins.0, pwm_pins.1);
-    // start timer with timestamp values in the range of 0..=99 and a frequency
-    // of 20 kHz
+    
 
     let pwm_pins2 = mcpwm.operator1.with_pins(
         peripherals.GPIO7,
@@ -95,10 +94,13 @@ async fn main(_spawner: Spawner) -> ! {
     );
     let mut right_motor = Motor::new(pwm_pins2.0, pwm_pins2.1);
 
+    // start timer with timestamp values in the range of 0..=99 and a frequency
+    // of 20 kHz
     let timer_clock_cfg = clock_cfg
         .timer_clock_with_frequency(99, PwmWorkingMode::Increase, Rate::from_khz(20))
         .unwrap();
     mcpwm.timer0.start(timer_clock_cfg);
+    mcpwm.timer1.start(timer_clock_cfg);
 
    
 
