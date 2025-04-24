@@ -100,7 +100,7 @@ async fn main(_spawner: Spawner) -> ! {
         .unwrap();
     mcpwm.timer0.start(timer_clock_cfg);
 
-    // pin will be high 50% of the time
+   
 
     // TODO: timeout
     let mut receive_data = async move || {
