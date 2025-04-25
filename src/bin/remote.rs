@@ -98,11 +98,11 @@ async fn main(_spawner: Spawner) -> ! {
             .saturating_sub(ADC_SHIFT);
         println!("Y value: {}", y);
 
-        let x = ((x / 10) as f32)
-            .map(0.0, 176.0, -100.0, 100.0)
+        let x = ((x/5) as f32)
+            .map(0.0, 1935.0/5.0, -100.0, 100.0)
             .clamp(-100.0, 100.0);
-        let y = ((y / 10) as f32)
-            .map(0.0, 176.0, -100.0, 100.0)
+        let y = ((y/5) as f32)
+            .map(0.0, 1935.0/5.0, -100.0, 100.0)
             .clamp(-100.0, 100.0);
         println!("X normed: {}", x);
         println!("Y normed: {}", y);
