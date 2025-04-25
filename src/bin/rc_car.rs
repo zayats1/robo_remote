@@ -79,7 +79,7 @@ async fn main(_spawner: Spawner) -> ! {
 
  
     let pwm_pins = mcpwm.operator0.with_pins(
-        peripherals.GPIO4,
+        peripherals.GPIO2,
         PwmPinConfig::UP_ACTIVE_HIGH,
         peripherals.GPIO3,
         PwmPinConfig::UP_ACTIVE_HIGH,
@@ -88,9 +88,9 @@ async fn main(_spawner: Spawner) -> ! {
     
 
     let pwm_pins2 = mcpwm.operator1.with_pins(
-        peripherals.GPIO5,
+        peripherals.GPIO4,
         PwmPinConfig::UP_ACTIVE_HIGH,
-        peripherals.GPIO6,
+        peripherals.GPIO5,
         PwmPinConfig::UP_ACTIVE_HIGH,
     );
     let mut right_motor = Motor::new(pwm_pins2.0, pwm_pins2.1);
@@ -162,8 +162,8 @@ async fn main(_spawner: Spawner) -> ! {
         if let Some(message) = received {
             match message {
                 // Todo: make speed stable
-                message::Message::LeftSpeed(speed) => left_motor.run(speed.clamp(-99.0, 99.0) as i16),
-                message::Message::RightSpeed(speed) => right_motor.run(speed.clamp(-99.0, 99.0) as i16),
+                message::Message::LeftSpeed(speed) => left_motor.run(speed.clamp(-100.0, 100.0) as i16),
+                message::Message::RightSpeed(speed) => right_motor.run(speed.clamp(-100.0, 100.0) as i16),
                 message::Message::Stop => {
                     left_motor.stop();
                     right_motor.stop();
