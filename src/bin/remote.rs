@@ -30,7 +30,7 @@ const ADC_SHIFT: u16 = 2144; // to obtain zero at the minimum of a joystick rang
 const PEER_ADDRESS: [u8; 6] = [0x54, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 
 
-const INTERVAL: Duration = Duration::from_nanos(10);
+const INTERVAL: Duration = Duration::from_micros(100);
 
 const WIFI_CHANNEL: u8 = 3;
 // TODO: master address
