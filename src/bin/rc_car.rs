@@ -35,7 +35,7 @@ const THE_ADDRESS: [u8; 6] = [0x54u8, 0x32, 0x04, 0x32, 0xf2, 0xb8];
 const WIFI_CHANNEL: u8 = 3;
 
 // so MCU shouldn't halt
-const INTERVAL: Duration = Duration::from_nanos(1);
+const INTERVAL: Duration = Duration::from_nanos(10);
 
 // Is it enough time to reconnect/react?
 const TIMEOUT: Duration = Duration::from_secs(1);
