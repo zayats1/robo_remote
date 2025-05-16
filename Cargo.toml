@@ -12,8 +12,6 @@ harness = false
 harness = false
 
 
-
-
 [dependencies]
 
 embedded-io = "0.6.1"
@@ -25,7 +23,7 @@ critical-section = "1.2.0"
 embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480"] }
 embassy-time = { version = "0.4.0", features = ["generic-queue-8"] }
 esp-hal-embassy = { version = "0.7.0", features = ["esp32c6", "executors"] }
-esp-wifi = { version = "0.13.0",  features = [
+esp-wifi = { version = "0.13.0", features = [
   "ble",
   "builtin-scheduler",
   "coex",
@@ -34,7 +32,7 @@ esp-wifi = { version = "0.13.0",  features = [
   "log",
   "wifi",
   "esp-now",
-]}
+] }
 
 esp-backtrace = { version = "0.15.1", features = [
   "colors",
@@ -46,7 +44,7 @@ esp-println = { version = "0.13.1", default-features = true, features = [
   "log",
 ] }
 heapless = { version = "0.8.0", default-features = false }
-static_cell = { version = "2.1.0"}
+static_cell = { version = "2.1.0" }
 
 log = "0.4.27"
 embassy-futures = "0.1.1"
